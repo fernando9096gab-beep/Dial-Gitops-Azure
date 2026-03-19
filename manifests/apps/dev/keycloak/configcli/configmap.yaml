@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm-config
+  namespace: keycloak
+  labels:
+    app: keycloak-config-cli
+# El fichero realm-config.json se define aquí como dato.
+# keycloak-config-cli lo leerá desde /config/realm-config.json
+# El contenido real del JSON lo añadimos en el Módulo 3.
+data:
+  realm-config.json: |
+    {
+      "realm": "mi-realm",
+      "enabled": true
+    }
+
