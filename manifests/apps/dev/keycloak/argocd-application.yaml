@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-stack
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    # ⚠️ Esta es la URL de TU repo, no la cambies
+    repoURL: https://github.com/fernando9096gab-beep/Dial-Gitops-Azure.git
+    targetRevision: main
+    path: manifests/apps/dev/keycloak
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: keycloak
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
