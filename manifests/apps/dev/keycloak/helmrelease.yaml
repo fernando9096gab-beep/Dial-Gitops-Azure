@@ -33,9 +33,9 @@ spec:
             repository: bitnamilegacy/postgresql
             tag: "17.6.0-debian-12-r4"
           auth:
-            username: keycloak
+            username: bn_keycloak
             password: "keycloak1234"
-            database: keycloak
+            database: bitnami_keycloak
           primary:
             persistence:
               enabled: true
@@ -55,9 +55,9 @@ spec:
             cpu: "1000m"
         startupProbe:
           enabled: true
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          failureThreshold: 60
+          initialDelaySeconds: 60
+          periodSeconds: 15
+          failureThreshold: 80
         livenessProbe:
           enabled: true
           initialDelaySeconds: 0
