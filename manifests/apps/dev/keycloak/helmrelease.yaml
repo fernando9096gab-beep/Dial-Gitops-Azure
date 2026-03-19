@@ -34,6 +34,8 @@ spec:
           user: "bn_keycloak"
           password: "keycloak1234"
           database: "bitnami_keycloak"
+          existingSecret: ""
+          existingSecretPasswordKey: ""
         keycloakConfigCli:
           enabled: false
         service:
