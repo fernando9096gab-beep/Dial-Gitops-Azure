@@ -5,13 +5,152 @@ metadata:
   namespace: keycloak
   labels:
     app: keycloak-config-cli
-# El fichero realm-config.json se define aquí como dato.
-# keycloak-config-cli lo leerá desde /config/realm-config.json
-# El contenido real del JSON lo añadimos en el Módulo 3.
 data:
   realm-config.json: |
     {
       "realm": "mi-realm",
-      "enabled": true
-    }
+      "enabled": true,
+      "displayName": "Mi Realm de Práctica",
+      "displayNameHtml": "<b>Mi Realm</b>",
+      "loginTheme": "keycloak",
+      "accessTokenLifespan": 300,
+      "ssoSessionMaxLifespan": 36000,
 
+      "roles": {
+        "realm": [
+          {
+            "name": "realm-admin",
+            "description": "Administrador completo del realm"
+          },
+          {
+            "name": "realm-user",
+            "description": "Usuario estándar del realm"
+          },
+          {
+            "name": "realm-viewer",
+            "description": "Solo puede ver recursos, sin modificar"
+          }
+        ]
+      },
+
+      "clients": [
+        {
+          "clientId": "mi-app",
+          "name": "Mi Aplicación de Práctica",
+          "enabled": true,
+          "publicClient": true,
+          "standardFlowEnabled": true,
+          "directAccessGrantsEnabled": true,
+          "rootUrl": "http://localhost:8080",
+          "redirectUris": [
+            "http://localhost:8080/*",
+            "http://127.0.0.1:8080/*"
+          ],
+          "webOrigins": [
+            "http://localhost:8080"
+          ],
+          "defaultClientScopes": [
+            "web-origins",
+            "profile",
+            "roles",
+            "email",
+            "mi-scope-basico"
+          ],
+          "roles": [
+            {
+              "name": "app-admin",
+              "description": "Administrador dentro de mi-app"
+            },
+            {
+              "name": "app-user",
+              "description": "Usuario normal dentro de mi-app"
+            },
+            {
+              "name": "app-viewer",
+              "description": "Solo lectura dentro de mi-app"
+            }
+          ]
+        }
+      ],
+
+      "clientScopes": [
+        {
+          "name": "mi-scope-basico",
+          "description": "Scope personalizado con claims extra",
+          "protocol": "openid-connect",
+          "attributes": {
+            "include.in.token.scope": "true",
+            "display.on.consent.screen": "true"
+          },
+          "protocolMappers": [
+            {
+              "name": "departamento-mapper",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-usermodel-attribute-mapper",
+              "consentRequired": false,
+              "config": {
+                "userinfo.token.claim": "true",
+                "user.attribute": "departamento",
+                "id.token.claim": "true",
+                "access.token.claim": "true",
+                "claim.name": "departamento",
+                "jsonType.label": "String"
+              }
+            }
+          ]
+        }
+      ],
+
+      "users": [
+        {
+          "username": "fernando-admin",
+          "enabled": true,
+          "email": "fernando.admin@mi-realm.local",
+          "firstName": "Fernando",
+          "lastName": "Admin",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "Admin1234!",
+              "temporary": false
+            }
+          ],
+          "realmRoles": [
+            "realm-admin"
+          ],
+          "clientRoles": {
+            "mi-app": [
+              "app-admin"
+            ]
+          },
+          "attributes": {
+            "departamento": ["DevOps"]
+          }
+        },
+        {
+          "username": "fernando-user",
+          "enabled": true,
+          "email": "fernando.user@mi-realm.local",
+          "firstName": "Fernando",
+          "lastName": "User",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "User1234!",
+              "temporary": false
+            }
+          ],
+          "realmRoles": [
+            "realm-user"
+          ],
+          "clientRoles": {
+            "mi-app": [
+              "app-user"
+            ]
+          },
+          "attributes": {
+            "departamento": ["Sistemas"]
+          }
+        }
+      ]
+    }
