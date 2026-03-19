@@ -6,35 +6,26 @@ metadata:
   labels:
     app: keycloak
     env: dev
-
 spec:
   project: default
-
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: keycloak
     targetRevision: "25.2.0"
-
     helm:
       releaseName: keycloak
-
       values: |
-
         image:
           registry: docker.io
           repository: bitnamilegacy/keycloak
           tag: "26.3.1-debian-12-r1"
           pullPolicy: IfNotPresent
-
         production: false
-
         proxy: edge
-
         auth:
           adminUser: admin
           adminPassword: "admin1234"
           managementPassword: "management1234"
-
         postgresql:
           enabled: true
           image:
@@ -49,34 +40,12 @@ spec:
             persistence:
               enabled: true
               size: 1Gi
-
-        externalDatabase:
-          host: keycloak-postgresql
-          port: 5432
-          user: keycloak
-          password: "keycloak1234"
-          database: keycloak
-
-        extraEnvVars:
-          - name: KEYCLOAK_DATABASE_HOST
-            value: "keycloak-postgresql"
-          - name: KEYCLOAK_DATABASE_PORT
-            value: "5432"
-          - name: KEYCLOAK_DATABASE_NAME
-            value: "keycloak"
-          - name: KEYCLOAK_DATABASE_USER
-            value: "keycloak"
-          - name: KEYCLOAK_DATABASE_PASSWORD
-            value: "keycloak1234"
-
         keycloakConfigCli:
           enabled: false
-
         service:
           type: ClusterIP
           ports:
             http: 80
-
         resources:
           requests:
             memory: "512Mi"
@@ -84,33 +53,27 @@ spec:
           limits:
             memory: "1Gi"
             cpu: "1000m"
-
         startupProbe:
           enabled: true
           initialDelaySeconds: 30
           periodSeconds: 10
           failureThreshold: 60
-
         livenessProbe:
           enabled: true
           initialDelaySeconds: 0
           periodSeconds: 10
           failureThreshold: 5
-
         readinessProbe:
           enabled: true
           initialDelaySeconds: 0
           periodSeconds: 10
           failureThreshold: 5
-
   destination:
     server: https://kubernetes.default.svc
     namespace: keycloak
-
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-
