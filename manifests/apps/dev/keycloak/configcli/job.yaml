@@ -3,93 +3,45 @@ kind: Job
 metadata:
   name: keycloak-config-cli
   namespace: keycloak
-  # Este label hace que ArgoCD también gestione este Job
   labels:
     app: keycloak-config-cli
-
 spec:
-  # Si el Job falla, lo reintenta hasta 3 veces
   backoffLimit: 3
   template:
     spec:
-
-      # ─── ORDEN DE ARRANQUE ─────────────────────────────────────────────────
-      # initContainers se ejecutan ANTES que el contenedor principal.
-      # Este initContainer espera a que Keycloak esté respondiendo
-      # antes de intentar configurarlo. Sin esto, el Job fallaría
-      # porque Keycloak tarda varios minutos en arrancar.
       initContainers:
         - name: wait-for-keycloak
-          image: curlimages/curl:8.5.0
-          # Ejecuta curl en bucle hasta que Keycloak responda HTTP 200.
-          # El endpoint /health/ready es el que Keycloak expone
-          # cuando está completamente listo para recibir peticiones.
+          image: bitnamilegacy/keycloak:26.3.1-debian-12-r1
           command:
             - sh
             - -c
             - |
-              echo "Esperando a que Keycloak esté listo..."
-              until curl -sf http://keycloak.keycloak.svc.cluster.local/health/ready; do
-                echo "Keycloak no está listo todavía. Reintentando en 10s..."
+              echo "Esperando a que Keycloak este listo..."
+              until curl -sf http://keycloak.keycloak.svc.cluster.local/realms/master; do
+                echo "Reintentando en 10s..."
                 sleep 10
               done
-              echo "Keycloak está listo. Iniciando configuración..."
-
-      # ─── CONTENEDOR PRINCIPAL ──────────────────────────────────────────────
+              echo "Keycloak listo."
       containers:
         - name: keycloak-config-cli
-          # Imagen oficial de keycloak-config-cli.
-          # Esta herramienta lee ficheros JSON y los aplica
-          # contra la API REST de Keycloak automáticamente.
-          # ⚠️ La versión debe ser compatible con tu Keycloak.
-          #    keycloak-config-cli 6.x es compatible con Keycloak 26.x
-          image: adorsys/keycloak-config-cli:6.1.4-26.0.5
-
+          image: quay.io/adorsys/keycloak-config-cli:v6.1.4-26.0.5
           env:
-            # ── URL interna de Keycloak dentro del clúster ─────────────────
-            # Formato: http://<service-name>.<namespace>.svc.cluster.local
-            # El Service de Bitnami se llama igual que el releaseName
             - name: KEYCLOAK_URL
               value: "http://keycloak.keycloak.svc.cluster.local"
-
-            # ── Credenciales del admin de Keycloak ─────────────────────────
-            # Deben coincidir EXACTAMENTE con las del helmrelease.yaml
             - name: KEYCLOAK_USER
               value: "admin"
-
             - name: KEYCLOAK_PASSWORD
               value: "admin1234"
-
-            # ── Dónde están los ficheros de configuración ──────────────────
-            # keycloak-config-cli lee todos los JSON de esta ruta.
-            # El volumen de abajo monta el ConfigMap en esta carpeta.
             - name: IMPORT_FILES_LOCATIONS
               value: "/config/*"
-
-            # ── Comportamiento ante recursos ya existentes ─────────────────
-            # true → si el realm ya existe, lo actualiza en vez de fallar.
-            # Útil para re-ejecuciones del Job (idempotente).
-            - name: IMPORT_MANAGED_CLIENT_MERGE-WITH-EXISTING
-              value: "true"
-
-            # ── Log más detallado para depuración ─────────────────────────
             - name: LOGGING_LEVEL_ROOT
               value: "INFO"
-
-          # ── Monta el ConfigMap como ficheros en /config ─────────────────
           volumeMounts:
             - name: realm-config
               mountPath: /config
               readOnly: true
-
-      # ─── VOLÚMENES ─────────────────────────────────────────────────────────
       volumes:
         - name: realm-config
           configMap:
-            # Este ConfigMap lo creamos en el PASO 3.
-            # Contiene el realm-config.json como dato del ConfigMap.
             name: keycloak-realm-config
-
-      # El Job no se reinicia solo al terminar (es un Job, no un Deployment)
       restartPolicy: Never
-
