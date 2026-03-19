@@ -50,6 +50,13 @@ spec:
               enabled: true
               size: 1Gi
 
+        externalDatabase:
+          host: keycloak-postgresql
+          port: 5432
+          user: keycloak
+          password: "keycloak1234"
+          database: keycloak
+
         keycloakConfigCli:
           enabled: false
 
