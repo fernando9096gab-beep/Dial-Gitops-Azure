@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://charts.bitnami.com/bitnami
     chart: keycloak
-    targetRevision: "24.0.4"
+    targetRevision: "25.2.0"
 
     helm:
       releaseName: keycloak
