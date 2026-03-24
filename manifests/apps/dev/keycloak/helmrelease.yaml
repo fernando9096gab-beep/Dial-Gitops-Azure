@@ -39,8 +39,6 @@ spec:
         extraEnvVars:
           - name: KC_DB_PASSWORD
             value: "keycloak1234"
-        keycloakConfigCli:
-          enabled: false
         service:
           type: ClusterIP
           ports:
